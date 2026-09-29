@@ -1,0 +1,7 @@
+{
+  "name": "review-gates",
+  "description": "Independent plan and spec review gates for agentic development, with triage and a decisions log to prevent review loops",
+  "version": "0.1.0",
+  "author": { "name": "Jeff" },
+  "keywords": ["review", "spec", "planning", "decisions", "workflow"]
+}

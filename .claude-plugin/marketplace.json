@@ -1,0 +1,11 @@
+{
+  "name": "review-gates",
+  "owner": { "name": "Jeff" },
+  "plugins": [
+    {
+      "name": "review-gates",
+      "source": "./",
+      "description": "Independent plan and spec review gates with triage and a decisions log"
+    }
+  ]
+}
