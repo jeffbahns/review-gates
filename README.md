@@ -47,7 +47,7 @@ produce the documents, and these skills as the gates between them.
 ## Install
 
 ```
-/plugin marketplace add <github-user>/review-gates
+/plugin marketplace add jeffbahns/review-gates
 /plugin install review-gates@review-gates
 ```
 
