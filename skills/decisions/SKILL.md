@@ -1,6 +1,6 @@
 ---
 name: decisions
-description: Create or update DECISIONS.md, a log of settled design decisions with reasons, so reviewers and future sessions do not reopen them. Use at the end of a planning or spec session, before context is compacted, or before starting a new phase.
+description: Create or update DECISIONS.md, a log of settled design decisions with reasons, so reviewers and future sessions do not reopen them. Use at the end of a spec or planning session, before context is compacted, or before starting a new phase.
 argument-hint: [path/to/DECISIONS.md or its directory]
 disable-model-invocation: true
 ---
@@ -14,8 +14,9 @@ without the conversation history.
 Arguments: $ARGUMENTS
 
 If a path is given, use it (a directory means DECISIONS.md inside it).
-Otherwise ask the user where it should live, suggesting the directory
-of the plan or spec being worked on.
+Otherwise ask the user where it should live. Suggest a directory both
+the spec and the plan sit under, since both reviewers look next to their
+file and then one level up (with Superpowers, `docs/superpowers/`).
 
 ## What counts as a decision
 

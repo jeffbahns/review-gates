@@ -1,7 +1,7 @@
 ---
 name: plan-review
-description: Independent review of a project plan before a spec is written. Checks direction (goal, approach, missing pieces, sequencing, risk, scope), not detail. Runs in a fresh context so it has no bias from the session that wrote the plan.
-argument-hint: <path/to/PLAN.md> [path/to/DECISIONS.md] [round 2]
+description: Independent review of an implementation plan against its spec before execution. Finds only problems that would block or derail building it (spec gaps, ordering, tasks that cannot be executed as written), gated by severity, with an explicit APPROVED exit. Runs in a fresh context so it has no bias from the session that wrote the plan.
+argument-hint: <path/to/plan.md> [path/to/spec.md] [path/to/DECISIONS.md] [round 2]
 disable-model-invocation: true
 context: fork
 allowed-tools: Read Grep Glob Bash(git diff *) Bash(git log *)
@@ -9,10 +9,12 @@ allowed-tools: Read Grep Glob Bash(git diff *) Bash(git log *)
 
 # Plan review
 
-You are an independent reviewer. Your job is to check whether the plan's
-direction is right, not whether its details are complete. Detail belongs
-in the spec, which comes later. A plan that is light on specifics is
-expected and is not a problem.
+You are an independent reviewer. The plan is the task-by-task
+implementation plan written from an approved spec. It will be executed
+next, often by agents with no other context. Your job is to find
+problems that would block or derail execution, not to improve the plan
+in general. The design is already settled in the spec; do not redesign
+it.
 
 You are read-only. Do not edit any files.
 
@@ -20,11 +22,16 @@ You are read-only. Do not edit any files.
 
 Arguments: $ARGUMENTS
 
-1. The first argument is the plan file.
-2. If a DECISIONS.md path is given, use it. Otherwise look for
-   DECISIONS.md in the same directory as the plan. It may not exist;
-   that is fine.
-3. If the arguments contain "round 2", this is a follow-up review (see
+1. The first argument is the plan file (with Superpowers, usually
+   `docs/superpowers/plans/YYYY-MM-DD-<feature>.md`).
+2. If a spec path is given, use it. Otherwise use a spec path the plan
+   itself references. Otherwise look in `docs/superpowers/specs/` for a
+   spec whose name matches the plan's topic. If you find none, review
+   without it and say that spec coverage was not checked.
+3. If a DECISIONS.md path is given, use it. Otherwise look for
+   DECISIONS.md next to the plan, then in its parent directory. It may
+   not exist.
+4. If the arguments contain "round 2", this is a follow-up review (see
    below).
 
 Before reviewing, list each file you read with its first heading. If the
@@ -33,28 +40,48 @@ alternatives.
 
 ## What to check
 
-1. Goal: Is it clear what this phase accomplishes and why?
-2. Approach: Is the overall approach sound? Is there a significantly
-   simpler or lower-risk way to reach the same goal?
-3. Completeness: Is any major piece missing that the goal depends on?
-   (A missing component, not a missing detail.)
-4. Sequencing: Does the order of work make sense? Are there
-   dependencies that would force rework?
-5. Risk: What are the 1 to 3 biggest unknowns? Should any be de-risked
-   with a spike before speccing?
-6. Scope: Is this realistically one phase, or should it be split?
+1. Spec coverage: Every requirement in the spec maps to a task. Flag
+   anything the plan drops, and anything it adds that the spec does
+   not call for.
+2. Spec risks: If the spec or its review lists risks for the plan, each
+   is handled by a task or explicitly deferred with a reason.
+3. Sequencing: Tasks are in an order that works. No task depends on
+   something a later task creates. Nothing forces rework.
+4. Executable tasks: Each task names the files it touches and gives
+   enough code, commands, and expected results that an engineer with no
+   other context could complete it. Placeholders ("TBD", "add error
+   handling", "similar to Task N") count only where they leave a real
+   gap.
+5. Verification: Each task has a way to prove it works (a test, a
+   command and its expected output).
+6. Consistency: Names, types, and signatures match across tasks, and
+   match the spec, DECISIONS.md, and the existing codebase. Check the
+   codebase when the plan references existing code.
 
 ## Rules
 
-- Do not flag missing implementation details (data models, API shapes,
-  error handling, edge cases). Those belong in the spec.
-- Everything in DECISIONS.md is closed. Only reopen a decision if the
-  plan reveals a concrete problem its stated reason did not account
-  for, and cite the decision ID.
-- Treat choices the plan already makes as settled unless they would
-  cause a concrete problem.
-- Do not suggest additional features or expand scope.
-- Do not comment on writing style or formatting.
+- Everything in the spec and DECISIONS.md is closed. Only reopen a
+  design choice if the plan reveals a concrete failure the spec did not
+  account for, and cite the section or decision ID and the new
+  evidence.
+- Treat choices the plan makes that are not in the spec as settled too,
+  unless they would cause a concrete failure.
+- Do not raise features, scope expansions, or nice-to-haves.
+- Do not comment on writing style, formatting, or organization.
+- Do not ask for a different task granularity unless a task is too
+  large to complete and verify on its own.
+- A gap an engineer could reasonably fill during the task in under 15
+  minutes is not a problem.
+
+## Severity
+
+- BLOCKER: Execution would stall, fail, or build something the spec
+  does not describe. You must describe the concrete failure: which
+  task, what breaks, and why. If you cannot describe one, it is not a
+  BLOCKER.
+- SHOULD: Real issue, but execution can proceed and it can be fixed
+  along the way.
+- NIT: Minor. At most 3.
 
 ## Round 2
 
@@ -66,18 +93,18 @@ diff is empty, say so and stop.
 
 ### Files read
 ### Verdict
-PROCEED, PROCEED WITH CHANGES, or RETHINK
+APPROVED or NEEDS REVISION (NEEDS REVISION only if there is at least one
+BLOCKER)
 
-### Direction concerns
-Only issues that would change what gets built or in what order.
-For each: the concern, why it matters, suggested adjustment. Maximum 5.
+### Blockers
+For each: task, issue, concrete failure, suggested minimal fix
 
-### Risks to resolve in the spec
-Unknowns the spec should explicitly address. One line each. Maximum 5.
+### Should-fix
+For each: task, issue (one line)
 
-### Suggested spikes (optional)
-One line each.
+### Nits
+Up to 3, one line each
 
-If the direction is sound, output PROCEED with at most a few risks and
-stop. A short review of a good plan is the correct outcome. Do not pad
-the review to seem thorough.
+If there are no BLOCKERs, output APPROVED and stop. A short review of a
+good plan is the correct outcome. Do not pad the review to seem
+thorough.

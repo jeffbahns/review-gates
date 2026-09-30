@@ -19,7 +19,7 @@ and stop.
 
 ## Step 1: Respond, do not edit
 
-For each direction concern, risk, BLOCKER, and SHOULD in the review,
+For each BLOCKER, SHOULD, and risk in the review,
 respond with one of:
 
 - ACCEPT: the concern is valid. Describe the specific change you would
@@ -56,7 +56,8 @@ Draft DECISIONS.md entries for:
 Use the format from the `review-gates:decisions` skill and continue the existing
 numbering. Show the proposed entries and wait for the user's approval
 before writing them. If DECISIONS.md does not exist, propose creating it
-next to the reviewed file.
+where both the spec and the plan can find it (with Superpowers,
+`docs/superpowers/DECISIONS.md`).
 
 After writing, remind the user that a round 2 review is optional, and
 that more than two rounds means the user should make the remaining

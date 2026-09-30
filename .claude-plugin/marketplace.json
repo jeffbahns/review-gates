@@ -5,7 +5,7 @@
     {
       "name": "review-gates",
       "source": "./",
-      "description": "Independent plan and spec review gates with triage and a decisions log"
+      "description": "Independent spec and plan review gates with triage and a decisions log"
     }
   ]
 }

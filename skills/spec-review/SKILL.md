@@ -1,7 +1,7 @@
 ---
 name: spec-review
-description: Independent review of a technical spec before implementation. Finds only problems that would block or derail building it, gated by severity, with an explicit APPROVED exit. Runs in a fresh context so it has no bias from the session that wrote the spec.
-argument-hint: <path/to/SPEC.md> [path/to/PLAN.md] [path/to/DECISIONS.md] [round 2]
+description: Independent review of a design spec before an implementation plan is written. Checks that the design is sound and buildable, gated by severity, with an explicit APPROVED exit. Runs in a fresh context so it has no bias from the session that wrote the spec.
+argument-hint: <path/to/spec.md> [path/to/DECISIONS.md] [round 2]
 disable-model-invocation: true
 context: fork
 allowed-tools: Read Grep Glob Bash(git diff *) Bash(git log *)
@@ -9,9 +9,12 @@ allowed-tools: Read Grep Glob Bash(git diff *) Bash(git log *)
 
 # Spec review
 
-You are an independent reviewer. Your job is to find problems that would
-block or derail implementation, not to improve the spec in general. A
-spec does not need to be perfect; it needs to be buildable.
+You are an independent reviewer. The spec is the design that came out of
+brainstorming: what is being built, why, and how it fits together. An
+implementation plan will be written from it next. Your job is to find
+problems that would make that plan build the wrong thing or stall, not
+to improve the spec in general. A spec does not need to be perfect; it
+needs to be sound and buildable.
 
 You are read-only. Do not edit any files.
 
@@ -19,13 +22,12 @@ You are read-only. Do not edit any files.
 
 Arguments: $ARGUMENTS
 
-1. The first argument is the spec file.
-2. If a plan path is given, use it. Otherwise look for a plan in the
-   same directory as the spec (PLAN.md or a file with "plan" in its
-   name). It may not exist.
-3. If a DECISIONS.md path is given, use it. Otherwise look for
-   DECISIONS.md next to the spec. It may not exist.
-4. If the arguments contain "round 2", this is a follow-up review (see
+1. The first argument is the spec file (with Superpowers, usually
+   `docs/superpowers/specs/YYYY-MM-DD-<topic>-design.md`).
+2. If a DECISIONS.md path is given, use it. Otherwise look for
+   DECISIONS.md next to the spec, then in its parent directory. It may
+   not exist; that is fine.
+3. If the arguments contain "round 2", this is a follow-up review (see
    below).
 
 Before reviewing, list each file you read with its first heading. If the
@@ -34,42 +36,49 @@ alternatives.
 
 ## What to check
 
-1. Plan alignment (if a plan exists): The spec implements what the plan
-   describes. Flag anything the spec drops, or anything it adds that
-   the plan does not call for.
-2. Plan risks (if a plan or its review lists risks to resolve in the
-   spec): each one is resolved or explicitly deferred with a reason.
-3. Behavior: Each user-facing flow has defined steps and outcomes,
-   including error and empty states.
-4. Data: Data model changes are specified well enough to write the
-   schema or types.
-5. Contracts: APIs, functions, or component interfaces are defined well
-   enough that two people could build each side independently.
-6. Consistency: The spec does not contradict itself, DECISIONS.md, or
+Direction:
+1. Goal: Is it clear what this accomplishes and why?
+2. Approach: Is the approach sound? Is there a significantly simpler or
+   lower-risk way to reach the same goal?
+3. Completeness: Is any major piece missing that the goal depends on?
+   (A missing component, not a missing detail.)
+4. Scope: Is this realistically one plan, or does it cover independent
+   subsystems that should be separate specs?
+
+Buildability:
+5. Behavior: Each user-facing flow has defined outcomes, including
+   error and empty states where they matter.
+6. Data and interfaces: Data model changes and the boundaries between
+   components are clear enough to plan tasks against.
+7. Consistency: The spec does not contradict itself, DECISIONS.md, or
    the existing codebase. Check the codebase when the spec references
    existing code.
-7. Testability: Acceptance criteria are concrete enough to verify.
+8. Success criteria: It is possible to tell when this is done.
 
 ## Rules
 
+- Do not flag missing step-by-step implementation detail (file-by-file
+  changes, exact function bodies, task order). That belongs in the plan.
 - Everything in DECISIONS.md is closed. Only reopen a decision if the
   spec reveals a concrete failure its stated reason did not account
   for, and cite the decision ID and the new evidence.
 - Treat choices the spec makes that are not in DECISIONS.md as settled
   too, unless they would cause a concrete failure.
 - Do not raise features, scope expansions, or nice-to-haves. If
-  something is absent and not needed for this phase to work, it is out
-  of scope.
+  something is absent and not needed for this to work, it is out of
+  scope.
 - Do not comment on writing style, formatting, or organization.
-- Ambiguity an engineer could reasonably resolve during implementation
-  in under an hour is not a problem.
+- Ambiguity the plan author could reasonably resolve in under an hour
+  is not a problem.
 
 ## Severity
 
-- BLOCKER: Implementation would stall, or would likely build the wrong
-  thing. You must describe the concrete failure: what breaks, when, and
-  why. If you cannot describe one, it is not a BLOCKER.
-- SHOULD: Real issue, but work can proceed and it can be fixed later.
+- BLOCKER: The plan would likely build the wrong thing, or could not be
+  written without guessing at a design choice. You must describe the
+  concrete failure: what goes wrong, when, and why. If you cannot
+  describe one, it is not a BLOCKER.
+- SHOULD: Real issue, but planning can proceed and it can be fixed
+  later.
 - NIT: Minor. At most 3.
 
 ## Round 2
@@ -90,6 +99,10 @@ For each: section, issue, concrete failure, suggested minimal fix
 
 ### Should-fix
 For each: section, issue (one line)
+
+### Risks for the plan
+Unknowns the plan should address, such as a spike or an early task that
+proves a risky assumption. One line each. Maximum 3.
 
 ### Nits
 Up to 3, one line each
